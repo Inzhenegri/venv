@@ -42,7 +42,7 @@ def my_line(img, start, end):
             (255, 0, 0),
             thickness,
             line_type)
-def plot(data):
+def plot():
     T = 0.1
     K = 1
     U = 0
@@ -50,25 +50,29 @@ def plot(data):
     time_counter = 0
     delta_time = 0
 
-    W = 420
-    size = W, W, 3
+    W = 340
+    size = W, int(W*1.9), 3
     rook_image = np.zeros(size, dtype=np.uint8)
     rook_window = "Drawing 1: Rook"
+    prvs_dvy_mapped = dvy_mapped
     while True:
+
         start_time = time.time()
         V = U * (delta_time / (T + delta_time)) + V * (T / (T + delta_time))
         time.sleep(0.01)
         delta_time = time.time() - start_time
         time_counter += delta_time
         U = 1
-        my_line(rook_image, (int(400 * time_counter), W - int(0.01*data)),
-                (int(400 * (time_counter + delta_time)), W - int(0.01*data)))
-        print(V, time_counter)
+        # my_line(rook_image, (int(40 * time_counter), int(W/2) - int(0.05*dvy_mapped)),
+        #         (int(40 * (time_counter + delta_time)), int(W/2) - int(0.05*dvy_mapped)))
+        my_line(rook_image, (int(40 * time_counter-delta_time), int(W/2) - int(0.05*prvs_dvy_mapped)),
+                (int(40 * time_counter), int(W/2) - int(0.05*dvy_mapped)))
+        prvs_dvy_mapped = dvy_mapped
         cv2.imshow(rook_window, rook_image)
         k = cv2.waitKey(30) & 0xff
         if k == 27:
             break
-        if time_counter > 1:
+        if time_counter > 100:
             break
 
 def my_line(img, start, end):
@@ -179,7 +183,7 @@ if __name__ == "__main__":
     thread2 = Thread(target=stream, args=())
     thread2.start()
     time.sleep(2)
-    thread1 = Thread(target=plot, args=(dvy_mapped,))
+    thread1 = Thread(target=plot, args=())
     thread1.start()
 
 
