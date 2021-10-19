@@ -26,7 +26,7 @@ def plot_matplotlib():
         plt.plot(x, y, 'g', linewidth=2.0)
         i += 1
         plt.show()
-        plt.pause(0.001)
+        plt.pause(0.0001)
         if i>1000:
 
             fig.clear()
@@ -34,69 +34,62 @@ def plot_matplotlib():
             x = list()
             y = list()
             i = 0.0
-def filtered_flow():
+def draw_axis(rook_image, zero_x, zero_y, W, width, numticks):
+    cv2.line(rook_image, (int(width/numticks), 0),(int(width/numticks), W), color=(255, 255, 0), thickness=2)
+    cv2.line(rook_image, (0, zero_y), (width, zero_y), color=(255, 255, 0), thickness=2)
+    for i in range(numticks):
+        cv2.line(rook_image, (int(i*width/numticks), 0), (int(i*width/numticks), W), color=(128, 128, 128), thickness=1)
+        cv2.putText(rook_image, str(i-1), (int(i*width/numticks)+10, zero_y+20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
+        cv2.putText(rook_image, str(numticks-i-5), (zero_x+10, int(i*W/numticks)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.4,
+                    (255, 255, 0), 1)
+        cv2.line(rook_image, (0, int(i*W/numticks)), (width, int(i*W/numticks)), color=(128, 128, 128), thickness=1)
+def plot(size):
 
-
-    W = 1000
-    size = W, int(W*1.9), 3
-    rook_image2 = np.zeros(size, dtype=np.uint8)
-    rook_window2 = "Drawing 2: Rook"
-    prvs_V = dvy_mapped
-    while True:
-        #start_time = time.time()
-        #time_counter +=delta_time
-        time.sleep(0.01)
-
-
-        U = 1
-        # my_line(rook_image, (int(40 * time_counter), int(W/2) - int(0.05*dvy_mapped)),
-        #         (int(40 * (time_counter + delta_time)), int(W/2) - int(0.05*dvy_mapped)))
-        my_line(rook_image2, (int(40 * time_counter-delta_time), int(W/2) - int(0.05*prvs_V)),
-                (int(40 * time_counter), int(W/2) - int(0.05*V)))
-        prvs_V = dvy_mapped
-        cv2.imshow(rook_window2, rook_image2)
-        k = cv2.waitKey(1) & 0xff
-        if k == 27:
-            break
-        if time_counter > 100:
-            break
-        #delta_time = time.time()-start_time
-def plot():
-    T = 0.1
-    K = 1
-    U = 0
-    V = 0
     time_counter = 0
     delta_time = 0
-
-    W = 340
-    size = W, int(W*1.9), 3
+    current_pixel = 0
+    prvs_pixel = 0
+    W = size
+    width = int(W*1.9)
+    scale_x = 500
+    scale_y = 0.15
+    size = W, width, 3
+    zero_x = 60
+    zero_y = int(W/2)
     rook_image = np.zeros(size, dtype=np.uint8)
-    rook_window = "Drawing 1: Rook"
+    rook_window = "Drawing 1: Rook{}".format(size)
     prvs_dvy_mapped = dvy_mapped
+    prvs_dvy_f = dvy_f
+    draw_axis(rook_image, zero_x, zero_y, W, width, numticks=10)
     while True:
-
         start_time = time.time()
-        V = U * (delta_time / (T + delta_time)) + V * (T / (T + delta_time))
-        time.sleep(0.01)
-        delta_time = time.time() - start_time
         time_counter += delta_time
-        U = 1
-        # my_line(rook_image, (int(40 * time_counter), int(W/2) - int(0.05*dvy_mapped)),
-        #         (int(40 * (time_counter + delta_time)), int(W/2) - int(0.05*dvy_mapped)))
-        my_line(rook_image, (int(40 * time_counter-delta_time), int(W/2) - int(0.05*prvs_dvy_mapped)),
-                (int(40 * time_counter), int(W/2) - int(0.05*dvy_mapped)))
-        prvs_dvy_mapped = dvy_mapped
+        if current_pixel >= width:
+            rook_image = np.zeros(size, dtype=np.uint8)
+            time_counter = 0.0
+            current_pixel = 0
+            prvs_pixel = 0
+            draw_axis(rook_image, zero_x, zero_y, W, width, numticks=10)
+        else:
+            current_pixel = int(scale_x * time_counter)
+            cv2.line(rook_image, (prvs_pixel+zero_x, int(zero_y - scale_y * prvs_dvy_mapped)),
+                    (current_pixel+zero_x, int(zero_y - scale_y * dvy_mapped)), color=(0, 255, 0), thickness=1)
+            cv2.line(rook_image, (prvs_pixel+zero_x, int(zero_y - scale_y * prvs_dvy_f)),
+                    (current_pixel+zero_x, int(zero_y - scale_y * dvy_f)), color=(0, 0, 255), thickness=1)
+            prvs_dvy_mapped = dvy_mapped
+            prvs_dvy_f = dvy_f
+
+
+            prvs_pixel = int(scale_x * (time_counter-delta_time))
         cv2.imshow(rook_window, rook_image)
+        delta_time = time.time() - start_time
         k = cv2.waitKey(1) & 0xff
         if k == 27:
             break
-        if time_counter > 100:
-            break
 
-def my_line(img, start, end):
-    thickness = 2
-    line_type = 8
+
+def my_line(img, start, end, thickness=2, line_type = 8):
+
     cv2.line(img,
             start,
             end,
@@ -116,58 +109,18 @@ def my_line_red(img, start, end):
             line_type)
 
 dvy_mapped = 0.0
-V=0.0
-delta_time = 0.0
-time_counter =0.0
+dvy_f= 0.0
 def stream():
     global dvy_mapped
-    global V
-    global time_counter
-    global delta_time
+    global dvy_f
     flag_first_flow_frame = False
-
-    T_f=5
-    K = 1
-    U = 0
-
-    #time_counter = 0
-    #delta_time = 0
-
-    # activate Bidirectional mode
-    options = {"bidirectional_mode": True}
-
-    # Define NetGear Client at given IP address and define parameters
-    # !!! change following IP address '192.168.x.xxx' with yours !!!
-    client = NetGear(
-        #address="172.20.10.9",
-        address="127.0.0.1",
-        port="5454",
-        protocol="tcp",
-        pattern=1,
-        receive_mode=True,
-        logging=True,
-        **options
-    )
-    # loop over
+    T_f = 0.15
+    dvy_f = 0.0
+    dt = 0.0
+    cap = cv2.VideoCapture(0)
     while True:
-
-
-        # prepare data to be sent
-        target_data = "Hi, I am a Client here. Retry"
-
-        # receive data from server and also send our data
-        data = client.recv(return_data=target_data)
-
-        # check for data if None
-        if data is None:
-            break
-
-        # extract server_data & frame from data
-        server_data, frame = data
-
-        # again check for frame if None
-        if frame is None:
-            break
+        st = time.time()
+        ret, frame = cap.read()
 
         # {do something with the extracted frame and data here}
         #ROI = frame[160:240, 0:320].copy()
@@ -191,14 +144,16 @@ def stream():
         prvs = next
 
         dvy_mapped = dvy*500
+        dt = time.time() - st
+        dvy_f = ((dvy_mapped - dvy_f) * 1 / T_f * dt) + dvy_f
+
         #V = signal.TransferFunction
         #print(dvy_mapped)
 
 
         #frame = cv2.resize(ROI, (320, 240), interpolation=cv2.INTER_AREA)
         # let  print recieved server data
-        if not (server_data is None):
-            print(server_data)
+
 
         # Show output window
         cv2.imshow("Output Frame", frame)
@@ -220,13 +175,10 @@ if __name__ == "__main__":
     thread2 = Thread(target=stream, args=())
     thread2.start()
     time.sleep(2)
-    #thread1 = Thread(target=plot, args=())
-    #thread1.start()
-    #thread0 = Thread(target=filtered_flow(), args=())
-    #thread0.start()
+    thread1 = Thread(target=plot, args=(500,))
+    thread1.start()
+
 
 
     thread2.join()
-    #thread1.join()
-
-    #thread0.join()
+    thread1.join()
