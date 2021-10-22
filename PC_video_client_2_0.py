@@ -123,6 +123,16 @@ def PID(Input, Feedback, SatUp, SatDwn, Kp, Ti, Kd,Integral=0, dt = 0.0):
            Output = SatDwn
     return Output, Proportional, Integral, Differential
 
+def map(var, oldmin, oldmax, newmin, newmax):
+    oldmin = oldmin
+    oldmax = oldmax
+    newmin = newmin
+    newmax = newmax
+    oldrange = oldmax - oldmin
+    newrange = newmax - newmin
+    mapped_value = (((var - oldmin) * newrange) / oldrange) + newmin
+    return mapped_value
+
 dvy_mapped = 0.0
 dvy_f= 0.0
 p = 0.0
@@ -144,11 +154,42 @@ def stream():
     Input =0.0
     i=0.0
 
-    cap = cv2.VideoCapture(0)
+    speed = 1500
+    angle = 1500
+    # activate Bidirectional mode
+    options = {"bidirectional_mode": True}
+
+    # Define NetGear Client at given IP address and define parameters
+    # !!! change following IP address '192.168.x.xxx' with yours !!!
+    client = NetGear(
+        address="10.10.0.14",
+        port="5454",
+        protocol="tcp",
+        pattern=1,
+        receive_mode=True,
+        logging=True,
+        **options
+    )
     while True:
         st = time.time()
-        ret, frame = cap.read()
+        # prepare data to be sent
+        target_data = [speed, angle]
 
+        # receive data from server and also send our data
+        data = client.recv(return_data=target_data)
+
+        # check for data if None
+        if data is None:
+            break
+
+        # extract server_data & frame from data
+        server_data, frame = data
+
+        # again check for frame if None
+        if frame is None:
+            break
+        # if not (server_data is None):
+        #     print(server_data)
         # {do something with the extracted frame and data here}
         #ROI = frame[160:240, 0:320].copy()
         ROI = frame[0:240, 0:320].copy()
@@ -173,20 +214,36 @@ def stream():
         dvy_mapped = dvy*500
 
         dvy_f = ((dvy_mapped - dvy_f) * 1 / T_f * dt) + dvy_f
-        u, p, i, d = PID(Input, Feedback=dvy_f, SatUp = 2000, SatDwn = -2000, Kp = 2, Ti = 0.1, Kd = 0.004, Integral=i, dt=dt)
+        u, p, i, d = PID(Input, Feedback=dvy_f, SatUp = 1000, SatDwn = 0, Kp = 0.2, Ti = 2.5, Kd = 0.001, Integral=i, dt=dt)
+        speed = map(var=u, oldmin=0, oldmax=1000, newmin=1520, newmax=1700)
         dt = time.time() - st
-
+        print(Input, speed)
         #frame = cv2.resize(ROI, (320, 240), interpolation=cv2.INTER_AREA)
         # let  print recieved server data
 
 
         # Show output window
-        cv2.imshow("Output Frame", frame)
+        #cv2.imshow("Output Frame", frame)
         cv2.imshow("Output ROI", ROI)
         # check for 'q' key if pressed
         key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
+        if key == ord("x"):
+            client.recv(return_data=[1500,1500])
             break
+        if key == ord("a"):
+            angle =1700
+        if key == ord("d"):
+            angle =1300
+        if key == ord("s"):
+            angle = 1500
+        if key == ord(" "):
+            Input = 0.0
+        if key == ord("e"):
+            Input +=10
+        if key == ord("q"):
+            Input -= 10
+
+
 
 
     # close output window
@@ -197,13 +254,12 @@ def stream():
 
 
 if __name__ == "__main__":
-    thread2 = Thread(target=stream, args=())
-    thread2.start()
+    # thread2 = Thread(target=stream, args=())
+    # thread2.start()
+
     time.sleep(2)
     thread1 = Thread(target=plot, args=(1000,))
-    thread1.start()
-
-
-
-    thread2.join()
-    thread1.join()
+    #thread1.start()
+    stream()
+    # thread2.join()
+    #thread1.join()

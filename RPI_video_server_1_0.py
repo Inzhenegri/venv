@@ -29,7 +29,7 @@ options = {"bidirectional_mode": True}
 # Define NetGear server at given IP address and define parameters
 # !!! change following IP address '192.168.x.xxx' with client's IP address !!!
 server = NetGear(
-    address="172.20.10.9",
+    address="10.10.0.14",
     port="5454",
     protocol="tcp",
     pattern=1,
