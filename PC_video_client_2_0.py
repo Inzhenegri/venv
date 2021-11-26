@@ -62,7 +62,7 @@ def plot(size):
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_y - scale_y * prvs_i)),
                      (current_pixel + zero_x, int(zero_y - scale_y * i)), color=(0, 255, 255), thickness=1)
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_y - scale_y * prvs_d)),
-                     (current_pixel + zero_x, int(zero_y - scale_y * d)), color=(0, 255, 0), thickness=1)
+                     (current_pixel + zero_x, int(zero_y - scale_y * d)), color=(0, 255, 0),3 thickness=1)
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_u - scale_u * prvs_u)),
                      (current_pixel + zero_x, int(zero_u - scale_u * u)), color=(255, 255, 255), thickness=1)
             prvs_dvy_mapped = dvy_mapped
@@ -162,7 +162,7 @@ def stream():
     # Define NetGear Client at given IP address and define parameters
     # !!! change following IP address '192.168.x.xxx' with yours !!!
     client = NetGear(
-        address="10.0.0.146",
+        address="10.0.0.128",
         port="5454",
         protocol="tcp",
         pattern=1,
@@ -192,7 +192,7 @@ def stream():
         #     print(server_data)
         # {do something with the extracted frame and data here}
         #ROI = frame[160:240, 0:320].copy()
-        ROI = frame[0:240, 0:320].copy()
+        ROI = frame[60:180, 80:240].copy()
         if not flag_first_flow_frame:
             prvs = cv2.cvtColor(ROI,cv2.COLOR_BGR2GRAY)
 
