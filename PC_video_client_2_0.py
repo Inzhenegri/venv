@@ -214,6 +214,15 @@ def stream():
         dvy_mapped = dvy*500
 
         dvy_f = ((dvy_mapped - dvy_f) * 1 / T_f * dt) + dvy_f
+
+
+
+
+
+
+
+
+
         u, p, i, d = PID(Input, Feedback=dvy_f, SatUp = 1000, SatDwn = 0, Kp = 0.2, Ti = 2.5, Kd = 0.001, Integral=i, dt=dt)
         speed = map(var=u, oldmin=0, oldmax=1000, newmin=1520, newmax=1700)
         dt = time.time() - st
