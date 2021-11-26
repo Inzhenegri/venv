@@ -95,7 +95,7 @@ if __name__ == "__main__":
         logging=True,
         max_retries = 1000000,
         **options
-    )  #
+
 
     # loop over until KeyBoard Interrupted
     while True:
