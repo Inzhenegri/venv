@@ -162,7 +162,7 @@ def stream():
     # Define NetGear Client at given IP address and define parameters
     # !!! change following IP address '192.168.x.xxx' with yours !!!
     client = NetGear(
-        address="10.10.0.14",
+        address="10.0.0.146",
         port="5454",
         protocol="tcp",
         pattern=1,
