@@ -62,7 +62,7 @@ def plot(size):
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_y - scale_y * prvs_i)),
                      (current_pixel + zero_x, int(zero_y - scale_y * i)), color=(0, 255, 255), thickness=1)
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_y - scale_y * prvs_d)),
-                     (current_pixel + zero_x, int(zero_y - scale_y * d)), color=(0, 255, 0), thickness=1)
+                     (current_pixel + zero_x, int(zero_y - scale_y * d)), color=(0, 255, 0),3 thickness=1)
             cv2.line(rook_image, (prvs_pixel + zero_x, int(zero_u - scale_u * prvs_u)),
                      (current_pixel + zero_x, int(zero_u - scale_u * u)), color=(255, 255, 255), thickness=1)
             prvs_dvy_mapped = dvy_mapped
@@ -215,6 +215,15 @@ def stream():
         dvy_mapped = dvy*500
 
         dvy_f = ((dvy_mapped - dvy_f) * 1 / T_f * dt) + dvy_f
+
+
+
+
+
+
+
+
+
         u, p, i, d = PID(Input, Feedback=dvy_f, SatUp = 1000, SatDwn = 0, Kp = 0.2, Ti = 2.5, Kd = 0.001, Integral=i, dt=dt)
         speed = map(var=u, oldmin=0, oldmax=1000, newmin=1520, newmax=1700)
         dt = time.time() - st
